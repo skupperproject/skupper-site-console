@@ -36,9 +36,9 @@ export const createSubscription = (namespace: string): K8sResourceSubscription =
     channel: 'alpha',
     installPlanApproval: 'Automatic',
     name: 'skupper-operator',
-    source: 'redhat-operators',
+    source: 'community-operators',
     sourceNamespace: 'openshift-marketplace',
-    startingCSV: 'skupper-operator.v1.4.1-rh-1'
+    startingCSV: 'skupper-operator.v1.6.0'
   }
 });
 

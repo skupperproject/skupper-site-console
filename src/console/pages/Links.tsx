@@ -1,7 +1,6 @@
 import { FC, useCallback, useState } from 'react';
 
 import {
-  PageSection,
   Card,
   CardHeader,
   CardBody,
@@ -11,8 +10,11 @@ import {
   ModalVariant,
   Toolbar,
   ToolbarContent,
-  ToolbarItem
+  ToolbarItem,
+  Alert,
+  Icon
 } from '@patternfly/react-core';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -145,6 +147,11 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
       prop: 'name'
     },
     {
+      name: t('Status'),
+      prop: 'status',
+      customCellName: 'status'
+    },
+    {
       name: t('Linked to'),
       prop: 'connectedTo'
     },
@@ -152,12 +159,6 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
       name: t('Cost'),
       prop: 'cost'
     },
-    {
-      name: t('Status'),
-      prop: 'status',
-      customCellName: 'status'
-    },
-
     {
       name: '',
       customCellName: 'actions',
@@ -173,10 +174,30 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
   ];
 
   const customCells = {
-    status: ({ data }: SKComponentProps<Link>) => <div>{!data.status ? t('Active') : `Err: ${data.status}`}</div>,
+    status: ({ data }: SKComponentProps<Link>) => {
+      if (!data.status) {
+        return (
+          <span>
+            <Icon isInline status="success">
+              <CheckCircleIcon />
+            </Icon>{' '}
+            {t('Active')}
+          </span>
+        );
+      }
+
+      return (
+        <span>
+          <Icon status="danger" isInline>
+            <ExclamationCircleIcon />
+          </Icon>{' '}
+          {data.status}
+        </span>
+      );
+    },
 
     actions: ({ data }: SKComponentProps<Link>) => (
-      <Button onClick={() => handleDeleteLink(data.name)} variant="secondary">
+      <Button onClick={() => handleDeleteLink(data.name)} variant="link">
         {t('Delete')}
       </Button>
     )
@@ -192,89 +213,70 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
 
   return (
     <>
-      <PageSection>
-        <Card isPlain>
-          <CardHeader>
-            <Title headingLevel="h1">{t('Links created from the site')}</Title>
-          </CardHeader>
+      <Card isPlain>
+        <CardHeader>
+          <Title headingLevel="h1">{t('Links created from the site')}</Title>
+        </CardHeader>
 
-          <CardBody>
-            <Toolbar>
-              <ToolbarContent>
-                <ToolbarItem>
-                  <Button onClick={() => setModalType('link')}>{t('Create link')}</Button>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Button variant="secondary" onClick={() => setIsTokenModalOpen(true)}>
-                    {t('Create token')}
-                  </Button>
-                </ToolbarItem>
-              </ToolbarContent>
-            </Toolbar>
+        <CardBody>
+          <Alert
+            variant="info"
+            isInline
+            title={t(
+              'Links enable communication between sites. Once sites are linked, they form a Skupper network. Click create token button to generate a downloadable token file for linking a remote site.'
+            )}
+          />
 
-            <SkTable
-              columns={localLinkColumns}
-              rows={parseLink(
-                ([...(links?.items || []), ...(claimLinks?.items || [])].filter(
-                  (item) =>
-                    item.metadata?.annotations && item.metadata.annotations['skupper.io/generated-by'] !== siteId
-                ) || []) as K8sResourceLink[]
-              )}
-              customCells={customCells}
-              alwaysShowPagination={false}
-              isPlain
-            />
-          </CardBody>
-        </Card>
+          <Toolbar>
+            <ToolbarContent className="pf-u-pl-0">
+              <ToolbarItem>
+                <Button onClick={() => setModalType('link')}>{t('Create link')}</Button>
+              </ToolbarItem>
+              <ToolbarItem>
+                <Button variant="secondary" onClick={() => setIsTokenModalOpen(true)}>
+                  {t('Create token')}
+                </Button>
+              </ToolbarItem>
+            </ToolbarContent>
+          </Toolbar>
 
-        <Modal title={t('Create link')} isOpen={!!modalType} variant={ModalVariant.medium} onClose={handleModalClose}>
-          <LinkForm onSubmit={handleRefreshLinks} onCancel={handleModalClose} siteId={siteId} />
-        </Modal>
-      </PageSection>
+          <SkTable
+            columns={localLinkColumns}
+            rows={parseLink(
+              ([...(links?.items || []), ...(claimLinks?.items || [])].filter(
+                (item) => item.metadata?.annotations && item.metadata.annotations['skupper.io/generated-by'] !== siteId
+              ) || []) as K8sResourceLink[]
+            )}
+            customCells={customCells}
+            alwaysShowPagination={false}
+            isPlain
+          />
+        </CardBody>
+      </Card>
 
-      <PageSection>
-        <Card isPlain>
-          <CardHeader>
-            <Title headingLevel="h1">{t('Links from remote sites')}</Title>
-          </CardHeader>
+      <Modal title={t('Create link')} isOpen={!!modalType} variant={ModalVariant.medium} onClose={handleModalClose}>
+        <LinkForm onSubmit={handleRefreshLinks} onCancel={handleModalClose} siteId={siteId} />
+      </Modal>
 
-          <CardBody>
-            <SkTable
-              columns={remoteLinkColumns}
-              rows={
-                remoteLinks?.map((link) => ({
-                  connectedTo: extractSiteNameFromUrl(link.name, '', '-skupper-router')
-                })) || []
-              }
-              alwaysShowPagination={false}
-              isPlain
-            />
-          </CardBody>
-        </Card>
-      </PageSection>
+      <Card isPlain>
+        <CardHeader>
+          <Title headingLevel="h1">{t('Links from remote sites')}</Title>
+        </CardHeader>
 
-      {/* <PageSection>
-        <Card isPlain>
-          <CardHeader>
-            <Title headingLevel="h1">{t('Claim tokens')}</Title>
-          </CardHeader>
+        <CardBody>
+          <SkTable
+            columns={remoteLinkColumns}
+            rows={
+              remoteLinks?.map((link) => ({
+                connectedTo: extractSiteNameFromUrl(link.name, '', '-skupper-router')
+              })) || []
+            }
+            alwaysShowPagination={false}
+            isPlain
+          />
+        </CardBody>
+      </Card>
 
-          <CardBody>
-            <SkTable
-              columns={tokenColumns}
-              rows={parseToken(
-                (tokens?.items.filter(
-                  (item) =>
-                    item.metadata?.annotations && item.metadata.annotations['skupper.io/generated-by'] === siteId
-                ) || []) as K8sResourceToken[]
-              )}
-              customCells={tokenCustomCells}
-              alwaysShowPagination={false}
-              isPlain
-            />
-          </CardBody>
-        </Card>
-  </PageSection>*/}
       <Modal
         title={t('Create link')}
         isOpen={!!isTokenModalOpen}

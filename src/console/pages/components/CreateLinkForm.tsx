@@ -14,15 +14,19 @@ import {
   StackItem,
   Stack,
   Title,
-  Card,
-  CardHeader,
   Icon,
-  CardBody,
-  Grid,
-  GridItem,
-  ClipboardCopy
+  Bullseye,
+  Spinner,
+  TextContent,
+  Text,
+  TextVariants,
+  Flex,
+  FlexItem,
+  Split,
+  SplitItem,
+  Panel
 } from '@patternfly/react-core';
-import { CodeIcon, LaptopIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { HelpIcon } from '@patternfly/react-icons/dist/esm/icons/help-icon';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -30,14 +34,17 @@ import { parse } from 'yaml';
 
 import { RESTApi } from '@API/REST.api';
 import { HTTPError } from '@API/REST.interfaces';
-import linkTutorial from '@assets/link-tutorial.png';
+import step1 from '@assets/step1.png';
+import step2 from '@assets/step2.png';
+import step3 from '@assets/step3.png';
+import step4 from '@assets/step4.png';
 import { I18nNamespace } from '@config/config';
 import ExternalLink from '@core/components/ExternalLink';
 import { K8sResourceLink } from '@K8sResources/resources.interfaces';
 
 const DEFAULT_COST = '1';
-const ButtonName: string[] = ['Next', 'Connect', 'Done'];
-const PrimaryColor = 'var(--pf-global--primary-color--100)';
+const ButtonName: string[] = ['Next', 'Create', 'Done'];
+const WizardContentHeight = '400px';
 
 type SubmitFunction = () => void;
 
@@ -63,14 +70,15 @@ const LinkForm: FC<{ onSubmit: SubmitFunction; onCancel: CancelFunction; siteId:
     mutationFn: (data: K8sResourceLink) => RESTApi.createLink(data),
     onMutate: () => {
       setIsLoading(true);
+      setStep(step + 1);
     },
     onError: (data: HTTPError) => {
       setValidated(data.descriptionMessage);
       setIsLoading(false);
     },
     onSuccess: () => {
+      setValidated(undefined);
       setIsLoading(false);
-      setStep(step + 1);
     }
   });
 
@@ -134,111 +142,45 @@ const LinkForm: FC<{ onSubmit: SubmitFunction; onCancel: CancelFunction; siteId:
           component: (
             <Stack hasGutter>
               <StackItem>
-                <Title headingLevel="h1">{t('How-To')}</Title>
-                <Alert
-                  variant="info"
-                  isInline
-                  title={t('Please ensure that you have reviewed the prerequisites prior to generating a link')}
+                <InstructionBlock
+                  img={step1}
+                  title={t('Step 1 - Visit a remote site')}
+                  description={t('Open a new browser window or tab and visit the remote site.')}
                 />
               </StackItem>
 
               <StackItem>
-                <img src={linkTutorial} alt="Link tutorial" />
+                <InstructionBlock
+                  img={step2}
+                  title={t('Step 2 - Generate a token file from the remote site')}
+                  description={t('Generate the token with the web console or the CLI.')}
+                  link1="https://skupper.io/docs/cli/tokens.html"
+                  link1Text="More information on token creation"
+                  link2="https://skupper.io/docs/cli/index.html"
+                  link2Text="More information CLI"
+                />
               </StackItem>
 
               <StackItem>
-                <StackItem>
-                  <Title headingLevel="h3">
-                    {t('Step 1 - Visit a remote site using a newly opened browser window or tab')}
-                  </Title>
-                </StackItem>
+                <InstructionBlock
+                  img={step3}
+                  title={t('Step 3 - Download the token file')}
+                  description={t('Download the token file from the remote site after generating it.')}
+                />
               </StackItem>
 
               <StackItem>
-                <Title headingLevel="h3">{t('Step 2 - Generate the token file')}</Title>
-              </StackItem>
-
-              <StackItem>
-                <Grid hasGutter>
-                  <GridItem span={6}>
-                    <Card isFlat isFullHeight>
-                      <CardHeader>
-                        <Stack>
-                          <StackItem>
-                            <Icon iconSize="lg">
-                              <LaptopIcon color={PrimaryColor} />
-                            </Icon>
-                          </StackItem>
-
-                          <StackItem>
-                            <Title headingLevel="h3">{t('Generate token by Web')}</Title>
-                          </StackItem>
-                        </Stack>
-                      </CardHeader>
-                      <CardBody>
-                        <Stack>
-                          <StackItem>
-                            {t('Continue this process in this interface to establish a connection with a remote site.')}
-                          </StackItem>
-                        </Stack>
-                      </CardBody>
-                    </Card>
-                  </GridItem>
-
-                  <GridItem span={6}>
-                    <Card isFlat isFullHeight>
-                      <CardHeader>
-                        <Stack>
-                          <StackItem>
-                            <Icon iconSize="lg">
-                              <CodeIcon color={PrimaryColor} />
-                            </Icon>
-                          </StackItem>
-
-                          <StackItem>
-                            <Title headingLevel="h3">{t('Generate token by CLI')}</Title>
-                          </StackItem>
-                        </Stack>
-                      </CardHeader>
-                      <CardBody>
-                        <Stack hasGutter>
-                          <StackItem>{t('Execute the following command in your terminal')}</StackItem>
-
-                          <StackItem>
-                            <code>
-                              <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
-                                {`skupper token create ~/secret.token.yaml`}
-                              </ClipboardCopy>
-                            </code>
-                          </StackItem>
-
-                          <StackItem>
-                            <ExternalLink
-                              text={t('More information on CLI instructions')}
-                              href="https://skupper.io/docs/cli-reference/skupper.html"
-                            />
-                          </StackItem>
-                        </Stack>
-                      </CardBody>
-                    </Card>
-                  </GridItem>
-                </Grid>
-              </StackItem>
-
-              <StackItem>
-                <Title headingLevel="h3">{t('Step 3 - Download the token file')}</Title>
-                <p>{t('Save the token file to your device.')}</p>
-              </StackItem>
-
-              <StackItem>
-                <Title headingLevel="h3">{t('Step 4 - Upload the token file from the remote site')}</Title>
-                <p>{t('Use the token file to establish a link.')}</p>
+                <InstructionBlock
+                  img={step4}
+                  title={t('Step 4 - Use a token to create a link')}
+                  description={t('Use the token file to create a link from the local site to the remote site.')}
+                />
               </StackItem>
             </Stack>
           )
         },
         { name: t('Create a connection'), component: <CreateForm validated={validated} onSubmit={handleChangeData} /> },
-        { name: t('Summary'), component: <Summary /> }
+        { name: t('Summary'), component: <Status isLoading={isLoading} error={validated} /> }
       ],
       []
     );
@@ -253,17 +195,19 @@ const LinkForm: FC<{ onSubmit: SubmitFunction; onCancel: CancelFunction; siteId:
         onClose={onCancel}
         footer={
           <WizardFooter>
-            {step === 2 && (
-              <Button variant="secondary" onClick={() => setStep(step - 1)}>
+            {(step === 2 || (step === 3 && (isLoading || validated))) && (
+              <Button variant="secondary" onClick={() => setStep(step - 1)} isDisabled={isLoading}>
                 {t('Back')}
               </Button>
             )}
-            <Button onClick={handleNextStep} isLoading={isLoading}>
+            <Button onClick={handleNextStep} isDisabled={isLoading}>
               {t(ButtonName[step - 1])}
             </Button>
-            <Button variant="link" onClick={onCancel}>
-              {t('Cancel')}
-            </Button>
+            {!(step === 3 && !isLoading && !validated) && (
+              <Button variant="link" onClick={onCancel}>
+                {isLoading ? t('Dismiss') : t('Cancel')}
+              </Button>
+            )}
           </WizardFooter>
         }
       />
@@ -329,7 +273,7 @@ const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<st
       <FormGroup
         isRequired
         label={t('Token')}
-        style={{ gridTemplateColumns: '1fr 4fr' }}
+        style={{ gridTemplateColumns: '1fr 5fr' }}
         labelIcon={
           <Popover bodyContent={<div>...</div>}>
             <button type="button" onClick={(e) => e.preventDefault()} className="pf-c-form__group-label-help">
@@ -355,7 +299,7 @@ const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<st
 
       <FormGroup
         label={t('Name')}
-        style={{ gridTemplateColumns: '1fr 4fr' }}
+        style={{ gridTemplateColumns: '1fr 5fr' }}
         labelIcon={
           <Popover bodyContent={<div>...</div>}>
             <button type="button" onClick={(e) => e.preventDefault()} className="pf-c-form__group-label-help">
@@ -377,7 +321,7 @@ const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<st
 
       <FormGroup
         label={t('Cost')}
-        style={{ gridTemplateColumns: '1fr 4fr' }}
+        style={{ gridTemplateColumns: '1fr 5fr' }}
         labelIcon={
           <Popover bodyContent={<div>...</div>}>
             <button type="button" onClick={(e) => e.preventDefault()} className="pf-c-form__group-label-help">
@@ -401,26 +345,114 @@ const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<st
   );
 };
 
-const Summary = function () {
+const Status: FC<{ isLoading: boolean; error: string | undefined }> = function ({ isLoading, error }) {
   const { t } = useTranslation(I18nNamespace);
 
+  if (isLoading) {
+    return (
+      <div style={{ height: WizardContentHeight }}>
+        <Bullseye>
+          <div>
+            <Spinner />
+            <p>{t('creating link...')}</p>
+          </div>
+        </Bullseye>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ height: WizardContentHeight }}>
+        <Bullseye>
+          <Flex alignItems={{ default: 'alignItemsCenter' }} direction={{ default: 'column' }}>
+            <FlexItem>
+              <Icon size="xl" status="danger">
+                <ExclamationCircleIcon />
+              </Icon>
+            </FlexItem>
+
+            <FlexItem>
+              <TextContent>
+                <Text component={TextVariants.h2} style={{ textAlign: 'center' }}>
+                  {t('It seems there was an error while creating the link')}
+                </Text>
+                <Text>{error}</Text>
+              </TextContent>
+            </FlexItem>
+          </Flex>
+        </Bullseye>
+      </div>
+    );
+  }
+
   return (
-    <Stack hasGutter>
-      <StackItem>
-        <Title headingLevel="h1">{t('Summary')}</Title>
-      </StackItem>
+    <div style={{ height: WizardContentHeight }}>
+      <Bullseye>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} direction={{ default: 'column' }}>
+          <FlexItem>
+            <Icon size="xl" status="success">
+              <CheckCircleIcon />
+            </Icon>
+          </FlexItem>
 
-      <StackItem>
-        <Alert
-          variant="success"
-          isInline
-          title="The link has successfully been created. Click Done to close the window."
-        />
-      </StackItem>
+          <FlexItem>
+            <TextContent>
+              <Text component={TextVariants.h2} style={{ textAlign: 'center' }}>
+                {t('Link created')}
+              </Text>
+              <Text>{t('Click "Done" to close the window')}</Text>
+            </TextContent>
+          </FlexItem>
+        </Flex>
+      </Bullseye>
+    </div>
+  );
+};
+//t('Step 1 - Visit a remote site using a newly opened browser window or tab')
+const InstructionBlock: FC<{
+  img: string;
+  title: string;
+  description: string;
+  link1?: string;
+  link1Text?: string;
+  link2?: string;
+  link2Text?: string;
+}> = function ({ img, title, description, link1, link1Text, link2, link2Text }) {
+  return (
+    <Panel variant="bordered">
+      <Split hasGutter>
+        <SplitItem>
+          <img src={img} alt="Link tutorial" />
+        </SplitItem>
 
-      <StackItem>
-        <Title headingLevel="h3">{t('Link Details')}</Title>
-      </StackItem>
-    </Stack>
+        <SplitItem isFilled>
+          <Flex
+            direction={{ default: 'column' }}
+            justifyContent={{ default: 'justifyContentCenter' }}
+            style={{ height: '100%' }}
+          >
+            <FlexItem>
+              <Title headingLevel="h3">{title}</Title>
+            </FlexItem>
+            <FlexItem>
+              <Text>{description}</Text>
+            </FlexItem>
+
+            <FlexItem>
+              <small>
+                {link1 && link1Text && <ExternalLink href={link1} text={link1Text} />}
+                {link2 && link2Text && (
+                  <>
+                    <span className="pf-u-mx-md"> | </span>
+                    <ExternalLink href={link2} text={link2Text} />
+                  </>
+                )}
+              </small>
+            </FlexItem>
+          </Flex>
+        </SplitItem>
+      </Split>
+    </Panel>
   );
 };
