@@ -29,6 +29,7 @@ import {
 import { axiosFetch } from './apiMiddleware';
 import { Connector, Listener, Site } from './REST.interfaces';
 import {
+  clusterVersionPath,
   configMapPath,
   configMapPathItem,
   operatorGroupsPath,
@@ -77,7 +78,7 @@ export const RESTApi = {
   checkIfExistOrInstallSubscription: async (): Promise<boolean> => {
     const subscriptions = await RESTApi.getSubscriptions();
 
-    const skupperOperator = subscriptions.items.find((item) => item.metadata?.name === 'skupper-operator');
+    const skupperOperator = subscriptions.items.find((item) => item.metadata?.name?.includes('skupper-operator'));
     if (!skupperOperator) {
       const subscription = await RESTApi.createSubscription();
 
@@ -104,6 +105,16 @@ export const RESTApi = {
     return response;
   },
 
+  deleteSubscription: async (): Promise<void> => {
+    await axiosFetch<void>(`${subscriptionsPath()}/skupper-operator`, {
+      method: 'DELETE'
+    });
+
+    await axiosFetch<void>(`${clusterVersionPath()}/skupper-operator.v1.6.0`, {
+      method: 'DELETE'
+    });
+  },
+
   createSite: async (data?: K8sResourceConfigMap): Promise<K8sResourceConfigMap> => {
     const response = await axiosFetch<K8sResourceConfigMap>(configMapPath(), {
       method: 'POST',
@@ -121,8 +132,9 @@ export const RESTApi = {
 
     return response;
   },
-
   deleteSite: async (name: string): Promise<K8sResourceConfigMap> => {
+  await RESTApi.deleteSubscription();
+
     const response = await axiosFetch<K8sResourceConfigMap>(configMapPathItem(name), {
       method: 'DELETE'
     });
@@ -238,6 +250,11 @@ export const RESTApi = {
       method: 'POST',
       data
     });
+
+     await axiosFetch<K8sResourceSecret>(`${secretsPath()}/${response.metadata?.name}`, {
+       method: 'DELETE'
+     });
+
 
     return response;
   },

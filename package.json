@@ -70,7 +70,7 @@
   },
   "consolePlugin": {
     "name": "site-console",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "displayName": "OpenShift Service Interconnect Site Plugin",
     "description": " Service Interconnect for OpenShift console plugins.",
     "exposedModules": {

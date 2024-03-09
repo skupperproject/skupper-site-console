@@ -169,9 +169,9 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
 export default TokenForm;
 
 const options = [
-  { value: 'min', label: 'min' },
-  { value: 'hours', label: 'hours' },
-  { value: 'days', label: 'days' }
+  { value: 'm', label: 'min' },
+  { value: 'h', label: 'hours' },
+  { value: 'd', label: 'days' }
 ];
 
 const CreateForm: FC<{
@@ -195,7 +195,7 @@ const CreateForm: FC<{
   const handleSetClaimExpiration = (value: string) => {
     if (value) {
       setClaimExpiration(value);
-      claimExpirationRef.current = value;
+      claimExpirationRef.current = `${value}${timeDimension}`;
     }
   };
 

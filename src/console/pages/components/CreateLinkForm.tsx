@@ -6,8 +6,6 @@ import {
   TextInput,
   Popover,
   Button,
-  FormAlert,
-  Alert,
   FileUpload,
   Wizard,
   WizardFooter,
@@ -175,7 +173,7 @@ const LinkForm: FC<{ onSubmit: SubmitFunction; onCancel: CancelFunction; siteId:
             </Stack>
           )
         },
-        { name: t('Create a connection'), component: <CreateForm validated={validated} onSubmit={handleChangeData} /> },
+        { name: t('Create a connection'), component: <CreateForm onSubmit={handleChangeData} /> },
         { name: t('Summary'), component: <Status isLoading={isLoading} error={validated} /> }
       ],
       []
@@ -215,10 +213,7 @@ const LinkForm: FC<{ onSubmit: SubmitFunction; onCancel: CancelFunction; siteId:
 
 export default LinkForm;
 
-const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<string, string>) => void }> = function ({
-  validated,
-  onSubmit
-}) {
+const CreateForm: FC<{ onSubmit: (data: Record<string, string>) => void }> = function ({ onSubmit }) {
   const { t } = useTranslation(I18nNamespace);
 
   const [name, setName] = useState('');
@@ -260,12 +255,6 @@ const CreateForm: FC<{ validated: string | undefined; onSubmit: (data: Record<st
 
   return (
     <Form isHorizontal>
-      {validated && (
-        <FormAlert>
-          <Alert variant="danger" title={validated} aria-live="polite" isInline />
-        </FormAlert>
-      )}
-
       <FormGroup
         isRequired
         label={t('Token')}

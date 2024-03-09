@@ -18,3 +18,7 @@ export const secretPathItem = (name: string) => `${secretsPath()}/${name}`;
 
 const POD_PATH = `${K8S_PREFIX_PATH}api/v1/namespaces/`;
 export const podPath = () => `${POD_PATH}${getSkupperNamespace()}/pods`;
+
+const CLUSTER_SERVICE_VERSION_PATH = `${K8S_PREFIX_PATH}apis/operators.coreos.com/v1alpha1/namespaces/`;
+export const clusterVersionPath = () =>
+  `${CLUSTER_SERVICE_VERSION_PATH}${getSkupperNamespace()}/clusterserviceversions`;
