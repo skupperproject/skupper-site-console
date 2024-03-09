@@ -12,7 +12,10 @@ import {
   WizardFooter,
   Title,
   Stack,
-  StackItem
+  StackItem,
+  InputGroup,
+  FormSelect,
+  FormSelectOption
 } from '@patternfly/react-core';
 import { DownloadIcon } from '@patternfly/react-icons';
 import { HelpIcon } from '@patternfly/react-icons/dist/esm/icons/help-icon';
@@ -22,11 +25,15 @@ import { stringify } from 'yaml';
 
 import { RESTApi } from '@API/REST.api';
 import { HTTPError } from '@API/REST.interfaces';
+import cStep1 from '@assets/cstep1.png';
+import cStep2 from '@assets/cstep2.png';
+import cStep3 from '@assets/cstep3.png';
 import { I18nNamespace } from '@config/config';
+import InstructionBlock from '@core/components/InstructionBlock';
 import { createTokenRequest } from '@K8sResources/resources';
 import { K8sResourceSecret } from '@K8sResources/resources.interfaces';
 
-const DEFAULT_CLAIM_EXPIRATION = '15m';
+const DEFAULT_CLAIM_EXPIRATION = '15';
 const DEFAULT_CLAIMS_MADE = '1';
 
 type SubmitFunction = (data: K8sResourceSecret) => void;
@@ -65,6 +72,7 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
   });
 
   const handleSubmit = useCallback(() => {
+    //TODO: waiting for skupper v2
     const data = {
       claimExpiration: claimExpirationRef.current,
       claimsMade: claimsMadeRef.current,
@@ -77,7 +85,6 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
       return;
     }
 
-    console.log(data);
     mutation.mutate({ ...createTokenRequest(nameRef.current) });
   }, [mutation, t]);
 
@@ -127,7 +134,7 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
         )
       },
       {
-        name: t('Download'),
+        name: t('Create link - How to'),
         component: <DownloadToken handleDownload={handleDownload} />
       }
     ],
@@ -144,15 +151,15 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
       onClose={onCancel}
       footer={
         <WizardFooter>
-          <Button
-            onClick={step - 1 === ButtonName.length - 1 ? onCancel : handleNextStep}
-            isDisabled={!isTokenDownloaded && step === 2}
-          >
+          <Button onClick={step - 1 === ButtonName.length - 1 ? onCancel : handleNextStep}>
             {t(ButtonName[step - 1])}
           </Button>
-          <Button variant="link" onClick={onCancel}>
-            {t('Cancel')}
-          </Button>
+          {step === 1 ||
+            (step === 2 && validated && (
+              <Button variant="link" onClick={onCancel}>
+                {t('Cancel')}
+              </Button>
+            ))}
         </WizardFooter>
       }
     />
@@ -160,6 +167,12 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
 };
 
 export default TokenForm;
+
+const options = [
+  { value: 'min', label: 'min' },
+  { value: 'hours', label: 'hours' },
+  { value: 'days', label: 'days' }
+];
 
 const CreateForm: FC<{
   validated: string | undefined;
@@ -172,6 +185,7 @@ const CreateForm: FC<{
   const [name, setName] = useState('');
   const [claimExpiration, setClaimExpiration] = useState(DEFAULT_CLAIM_EXPIRATION);
   const [claimsMade, setClaimsMade] = useState(DEFAULT_CLAIMS_MADE);
+  const [timeDimension, setTimeDimension] = useState(options[0].value);
 
   const handleSetName = (value: string) => {
     setName(value);
@@ -190,6 +204,10 @@ const CreateForm: FC<{
     claimsMadeRef.current = value;
   };
 
+  const onChangeTimeDimension = (value: string) => {
+    setTimeDimension(value);
+  };
+
   return (
     <Stack hasGutter>
       <StackItem>
@@ -205,7 +223,7 @@ const CreateForm: FC<{
           )}
 
           <FormGroup
-            label={t('Name')}
+            label={t('File name')}
             style={{ gridTemplateColumns: '1fr 4fr' }}
             labelIcon={
               <Popover bodyContent={<div>...</div>}>
@@ -221,20 +239,6 @@ const CreateForm: FC<{
           </FormGroup>
 
           <FormGroup
-            label={t('Expiration time')}
-            style={{ gridTemplateColumns: '1fr 4fr' }}
-            labelIcon={
-              <Popover bodyContent={<div>...</div>}>
-                <button type="button" onClick={(e) => e.preventDefault()} className="pf-c-form__group-label-help">
-                  <HelpIcon />
-                </button>
-              </Popover>
-            }
-            fieldId="simple-form-cost-01"
-          >
-            <TextInput isRequired type="text" value={claimExpiration} onChange={handleSetClaimExpiration} />
-          </FormGroup>
-          <FormGroup
             label={t('Claims')}
             style={{ gridTemplateColumns: '1fr 4fr' }}
             labelIcon={
@@ -246,7 +250,35 @@ const CreateForm: FC<{
             }
             fieldId="simple-form-Ingress-01"
           >
-            <TextInput isRequired type="number" value={claimsMade} onChange={handleSetClaimsMade} />
+            <TextInput
+              isRequired
+              type="number"
+              value={claimsMade}
+              onChange={handleSetClaimsMade}
+              style={{ maxWidth: '100%' }}
+            />
+          </FormGroup>
+
+          <FormGroup
+            label={t('Expiration time')}
+            style={{ gridTemplateColumns: '1fr 4fr' }}
+            labelIcon={
+              <Popover bodyContent={<div>...</div>}>
+                <button type="button" onClick={(e) => e.preventDefault()} className="pf-c-form__group-label-help">
+                  <HelpIcon />
+                </button>
+              </Popover>
+            }
+            fieldId="simple-form-cost-01"
+          >
+            <InputGroup>
+              <TextInput isRequired type="text" value={claimExpiration} onChange={handleSetClaimExpiration} />
+              <FormSelect value={timeDimension} onChange={onChangeTimeDimension} style={{ width: '100px' }}>
+                {options.map((option, index) => (
+                  <FormSelectOption key={index} value={option.value} label={option.label} />
+                ))}
+              </FormSelect>
+            </InputGroup>
           </FormGroup>
         </Form>
       </StackItem>
@@ -262,27 +294,38 @@ const DownloadToken: FC<{
   return (
     <Stack hasGutter>
       <StackItem>
-        <Title headingLevel="h1">{t('Download')}</Title>
+        <Title headingLevel="h1">{t('Create link - How to')}</Title>
       </StackItem>
 
       <StackItem>
-        <Alert
-          variant="success"
-          isInline
-          title={t('The token has successfully been created. Click Download to save the token file.')}
+        <InstructionBlock
+          img={cStep1}
+          title={t('Step 1 - Download the token file')}
+          description={t('Click the button to download the token file')}
+          component={
+            <Button variant="link" onClick={handleDownload} style={{ paddingLeft: 0 }} icon={<DownloadIcon />}>
+              <small>{t('Download the token file')}</small>
+            </Button>
+          }
         />
       </StackItem>
 
       <StackItem>
-        <Title headingLevel="h4">
-          {t('Once you have downloaded the token file, you can use it to connect a remote site.')}
-        </Title>
+        <InstructionBlock
+          img={cStep2}
+          title={t('Step 2 - Navigate to a remote Openshift cluster')}
+          description={t('Access the plugin TAB of a remote OpenShift cluster to establish a link with this site')}
+        />
       </StackItem>
 
       <StackItem>
-        <Button variant="link" onClick={handleDownload} style={{ paddingLeft: 0 }} icon={<DownloadIcon />}>
-          <small>{t('Download the token file')}</small>
-        </Button>
+        <InstructionBlock
+          img={cStep3}
+          title={t('Step 3 - Upload the token file')}
+          description={t(
+            'Navigate to the "Link" section, then click on the "Create Link" button and follow the provided steps.'
+          )}
+        />
       </StackItem>
     </Stack>
   );

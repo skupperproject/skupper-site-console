@@ -19,6 +19,7 @@
   "Links created from the site": "Links",
   "Links from remote sites": "Links from remote sites",
   "Name": "Name",
+  "File name": "File name",
   "Claims remaining": "Claims remaining",
   "Claims made": "Claims made",
   "Claim expires at": "Claim expires at",
@@ -58,6 +59,7 @@
 
   "How-To": "Prerequisites",
   "Configuration": "Configuration",
+  "Create link - How to": "Create link - How to",
   "Download": "Download",
   "Generate token": "Generate token",
   "You cannot link to yourself": "You cannot link to yourself",

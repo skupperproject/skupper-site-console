@@ -13,7 +13,6 @@ import {
   WizardFooter,
   StackItem,
   Stack,
-  Title,
   Icon,
   Bullseye,
   Spinner,
@@ -21,10 +20,7 @@ import {
   Text,
   TextVariants,
   Flex,
-  FlexItem,
-  Split,
-  SplitItem,
-  Panel
+  FlexItem
 } from '@patternfly/react-core';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { HelpIcon } from '@patternfly/react-icons/dist/esm/icons/help-icon';
@@ -39,7 +35,7 @@ import step2 from '@assets/step2.png';
 import step3 from '@assets/step3.png';
 import step4 from '@assets/step4.png';
 import { I18nNamespace } from '@config/config';
-import ExternalLink from '@core/components/ExternalLink';
+import InstructionBlock from '@core/components/InstructionBlock';
 import { K8sResourceLink } from '@K8sResources/resources.interfaces';
 
 const DEFAULT_COST = '1';
@@ -407,52 +403,5 @@ const Status: FC<{ isLoading: boolean; error: string | undefined }> = function (
         </Flex>
       </Bullseye>
     </div>
-  );
-};
-//t('Step 1 - Visit a remote site using a newly opened browser window or tab')
-const InstructionBlock: FC<{
-  img: string;
-  title: string;
-  description: string;
-  link1?: string;
-  link1Text?: string;
-  link2?: string;
-  link2Text?: string;
-}> = function ({ img, title, description, link1, link1Text, link2, link2Text }) {
-  return (
-    <Panel variant="bordered">
-      <Split hasGutter>
-        <SplitItem>
-          <img src={img} alt="Link tutorial" />
-        </SplitItem>
-
-        <SplitItem isFilled>
-          <Flex
-            direction={{ default: 'column' }}
-            justifyContent={{ default: 'justifyContentCenter' }}
-            style={{ height: '100%' }}
-          >
-            <FlexItem>
-              <Title headingLevel="h3">{title}</Title>
-            </FlexItem>
-            <FlexItem>
-              <Text>{description}</Text>
-            </FlexItem>
-
-            <FlexItem>
-              <small>
-                {link1 && link1Text && <ExternalLink href={link1} text={link1Text} />}
-                {link2 && link2Text && (
-                  <>
-                    <span className="pf-u-mx-md"> | </span>
-                    <ExternalLink href={link2} text={link2Text} />
-                  </>
-                )}
-              </small>
-            </FlexItem>
-          </Flex>
-        </SplitItem>
-      </Split>
-    </Panel>
   );
 };
