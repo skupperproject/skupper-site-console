@@ -52,7 +52,7 @@ const AppContent = function () {
   }
 
   const components: ReactNode[] = [
-    <GetStarted key={1} />,
+    <GetStarted key={1} siteId={site.metadata?.uid as string} />,
     <Details onGoTo={handleTabClick} onDeleteSite={refetch} key={2} />,
     <Bullseye key={3}>Tab 3 section</Bullseye>,
     <Links siteId={site.metadata?.uid as string} key={4} />,

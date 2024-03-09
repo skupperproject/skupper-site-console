@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useState } from 'react';
 
 import {
   Card,
@@ -55,11 +55,6 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
     queryFn: () => RESTApi.getRemoteLinks()
   });
 
-  // const { data: tokens, refetch: refetchTokens } = useQuery({
-  //   queryKey: ['get-tokens-query'],
-  //   queryFn: () => RESTApi.getSecrets({ query: 'labelSelector=skupper.io/type=connection-token' })
-  // });
-
   const mutation = useMutation({
     mutationFn: (name: string) => RESTApi.deleteSecret(name),
     onSuccess: () => {
@@ -71,22 +66,9 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
     }
   });
 
-  // const tokenMutation = useMutation({
-  //   mutationFn: (name: string) => RESTApi.deleteSecret(name),
-  //   onSuccess: () => {
-  //     setTimeout(() => {
-  //       refetchTokens();
-  //     }, 1000);
-  //   }
-  // });
-
   function handleDeleteLink(name: string) {
     mutation.mutate(name);
   }
-
-  // function handleDeleteToken(name: string) {
-  //   tokenMutation.mutate(name);
-  // }
 
   const handleRefreshLinks = () => {
     setTimeout(() => {
@@ -105,41 +87,6 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
   const handleTokenModalClose = () => {
     setIsTokenModalOpen(false);
   };
-
-  const handleTokenSubmit = useCallback(() => {
-    handleTokenModalClose();
-  }, []);
-
-  // useEffect(() => {
-  //   if (isTokenModalOpen === false) {
-  //     refetchTokens();
-  //   }
-  // }, [isTokenModalOpen, refetchTokens]);
-
-  // const tokenColumns: SKColumn<Token>[] = [
-  //   {
-  //     name: t('Name'),
-  //     prop: 'name'
-  //   },
-  //   {
-  //     name: t('Claims made'),
-  //     prop: 'claimsRemaining'
-  //   },
-  //   {
-  //     name: t('Claims remaining'),
-  //     prop: 'claimsRemaining'
-  //   },
-  //   {
-  //     name: t('Claim expires at'),
-  //     prop: 'claimExpiration'
-  //   },
-
-  //   {
-  //     name: '',
-  //     customCellName: 'actions',
-  //     modifier: 'fitContent'
-  //   }
-  // ];
 
   const localLinkColumns: SKColumn<Link>[] = [
     {
@@ -203,14 +150,6 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
     )
   };
 
-  // const tokenCustomCells = {
-  //   actions: ({ data }: SKComponentProps<Token>) => (
-  //     <Button onClick={() => handleDeleteToken(data.name)} variant="secondary">
-  //       {t('Delete')}
-  //     </Button>
-  //   )
-  // };
-
   return (
     <>
       <Card isPlain>
@@ -254,10 +193,6 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
         </CardBody>
       </Card>
 
-      <Modal title={t('Create link')} isOpen={!!modalType} variant={ModalVariant.medium} onClose={handleModalClose}>
-        <LinkForm onSubmit={handleRefreshLinks} onCancel={handleModalClose} siteId={siteId} />
-      </Modal>
-
       <Card isPlain>
         <CardHeader>
           <Title headingLevel="h1">{t('Links from remote sites')}</Title>
@@ -277,38 +212,21 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
         </CardBody>
       </Card>
 
+      <Modal title={t('Create link')} isOpen={!!modalType} variant={ModalVariant.medium} onClose={handleModalClose}>
+        <LinkForm onSubmit={handleRefreshLinks} onCancel={handleModalClose} siteId={siteId} />
+      </Modal>
+
       <Modal
         title={t('Create link')}
         isOpen={!!isTokenModalOpen}
         variant={ModalVariant.medium}
         onClose={handleTokenModalClose}
       >
-        <TokenForm onSubmit={handleTokenSubmit} onCancel={handleTokenModalClose} />
+        <TokenForm onSubmit={handleTokenModalClose} onCancel={handleTokenModalClose} />
       </Modal>
     </>
   );
 };
-
-// function parseToken(tokens: K8sResourceToken[]): Token[] {
-//   return tokens.map((token) => {
-//     const creationTimestamp = token.metadata?.creationTimestamp as string;
-//     const id = token.metadata?.uid as string;
-//     const name = token.metadata?.name as string;
-
-//     const claimsMade = token.metadata?.annotations?.['skupper.io/claims-made'] as string;
-//     const claimsRemaining = token.metadata?.annotations?.['skupper.io/claims-remaining'] as string;
-//     const claimExpiration = token.metadata?.annotations?.['skupper.io/claim-expiration'] as string;
-
-//     return {
-//       claimsMade,
-//       claimsRemaining,
-//       claimExpiration,
-//       creationTimestamp,
-//       name,
-//       id
-//     };
-//   });
-// }
 
 function parseLink(links: K8sResourceLink[]): Link[] {
   return links.map((link) => {

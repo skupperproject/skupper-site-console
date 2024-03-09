@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, ReactElement, useCallback, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -22,34 +22,55 @@ import { useTranslation } from 'react-i18next';
 import { I18nNamespace } from '@config/config';
 import ExternalLink from '@core/components/ExternalLink';
 
+import ConnectorForm from './components/CreateConnectorForm';
+import LinkForm from './components/CreateLinkForm';
+import ListenerForm from './components/CreateListenerForm';
+import TokenForm from './components/CreateTokenForm';
+
+enum Actions {
+  Token = 'token',
+  Link = 'link',
+  Listener = 'listener',
+  Connector = 'connector'
+}
+
 enum GetStartedLabels {
   Intro = 'Skupper is a layer 7 service interconnect. It enables secure communication across Kubernetes clusters with no VPNs or special firewall rules',
   ConsoleDescription = 'Skupper site console is used during network setup. '
 }
 
-const GetStarted = function () {
+const GetStarted: FC<{ siteId: string }> = function ({ siteId }) {
   const { t } = useTranslation(I18nNamespace);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [action, setAction] = useState('');
 
-  const handleModalConfirm = () => {
-    handleModalClose();
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const handleOperation = (newAction: string) => {
+    setAction(newAction);
+    setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const handleOperation = (action: string) => {
-    console.log(action);
-  };
+  const ActionFormMap: Record<string, ReactElement> = useMemo(
+    () => ({
+      [Actions.Token]: <TokenForm onSubmit={handleModalClose} onCancel={handleModalClose} />,
+      [Actions.Link]: <LinkForm onSubmit={handleModalClose} onCancel={handleModalClose} siteId={siteId} />,
+      [Actions.Listener]: <ListenerForm onSubmit={handleModalClose} onCancel={handleModalClose} siteId={siteId} />,
+      [Actions.Connector]: <ConnectorForm onSubmit={handleModalClose} onCancel={handleModalClose} />
+    }),
+    [handleModalClose, siteId]
+  );
 
   const DetailItem: FC<{
     title: string;
     description: string;
+    btnName?: string;
     actionName?: string;
     onClick: (action: string) => void;
-  }> = function ({ title, description, actionName, onClick }) {
+  }> = function ({ title, description, actionName, btnName, onClick }) {
     return (
       <DataListItem>
         <DataListItemRow>
@@ -74,7 +95,7 @@ const GetStarted = function () {
                 {actionName && (
                   <DataListCell key="action-content">
                     <Button variant={ButtonVariant.secondary} onClick={() => onClick(actionName)}>
-                      {actionName}
+                      {btnName}
                     </Button>
                   </DataListCell>
                 )}
@@ -104,25 +125,29 @@ const GetStarted = function () {
         <DetailItem
           title="Generating tokens"
           description="A token is required to create a link. The token contains a URL, which locates the ingress of the target site, and a secret, which represents the authority to create a link"
-          actionName="Generate a token"
+          btnName="Generate a token"
+          actionName={Actions.Token}
           onClick={handleOperation}
         />
         <DetailItem
           title="Linking to remote sites"
           description="A link is a site-to-site communication channel. Links serve as a transport for application traffic such as connections and requests. Links are always encrypted using mutual TLS"
-          actionName="Create a link"
+          btnName="Create a link"
+          actionName={Actions.Link}
           onClick={handleOperation}
         />
         <DetailItem
           title="Expose a service for accepting connections"
           description="Listeners use a routing key to forward connection data to remote connectors"
-          actionName="Create a listener"
+          btnName="Create a listener"
+          actionName={Actions.Listener}
           onClick={handleOperation}
         />
         <DetailItem
           title="Binds local servers to listeners in remote sites"
           description="Connectors are linked to listeners by a matching routing key"
-          actionName="Create a connector"
+          btnName="Create a connector"
+          actionName={Actions.Connector}
           onClick={handleOperation}
         />
       </DataList>
@@ -150,21 +175,8 @@ const GetStarted = function () {
         />
       </PageSection>
 
-      <Modal
-        title=" modal"
-        variant={ModalVariant.small}
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        actions={[
-          <Button key="confirm" variant="primary" onClick={handleModalConfirm}>
-            {t('Confirm')}
-          </Button>,
-          <Button key="cancel" variant="link" onClick={handleModalClose}>
-            {t('Cancel')}
-          </Button>
-        ]}
-      >
-        test
+      <Modal title=" modal" variant={ModalVariant.medium} isOpen={isModalOpen} onClose={handleModalClose}>
+        {ActionFormMap[action]}
       </Modal>
     </>
   );
