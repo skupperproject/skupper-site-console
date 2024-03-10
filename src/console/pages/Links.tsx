@@ -12,7 +12,8 @@ import {
   ToolbarContent,
   ToolbarItem,
   Alert,
-  Icon
+  Icon,
+  AlertActionCloseButton
 } from '@patternfly/react-core';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -33,6 +34,7 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
 
   const [modalType, setModalType] = useState<'link' | 'token' | undefined>();
   const [isTokenModalOpen, setIsTokenModalOpen] = useState<boolean | undefined>();
+  const [showAlert, setShowAlert] = useState<boolean>(true);
 
   const { data: links, refetch: refetchLocalLinks } = useQuery({
     queryKey: ['get-links-query'],
@@ -158,13 +160,17 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
         </CardHeader>
 
         <CardBody>
-          <Alert
-            variant="info"
-            isInline
-            title={t(
-              'Links enable communication between sites. Once sites are linked, they form a Skupper network. Click create token button to generate a downloadable token file for linking a remote site.'
-            )}
-          />
+          {showAlert && (
+            <Alert
+              hidden={true}
+              variant="info"
+              isInline
+              actionClose={<AlertActionCloseButton onClose={() => setShowAlert(false)} />}
+              title={t(
+                'Links enable communication between sites. Once sites are linked, they form a Skupper network. Click create token button to generate a downloadable token file for linking a remote site.'
+              )}
+            />
+          )}
 
           <Toolbar>
             <ToolbarContent className="pf-u-pl-0">
