@@ -175,7 +175,7 @@ const GetStarted: FC<{ siteId: string }> = function ({ siteId }) {
         />
       </PageSection>
 
-      <Modal title=" modal" variant={ModalVariant.medium} isOpen={isModalOpen} onClose={handleModalClose}>
+      <Modal title={action} variant={ModalVariant.medium} isOpen={isModalOpen} onClose={handleModalClose}>
         {ActionFormMap[action]}
       </Modal>
     </>

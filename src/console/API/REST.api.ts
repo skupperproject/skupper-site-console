@@ -132,8 +132,9 @@ export const RESTApi = {
 
     return response;
   },
+
   deleteSite: async (name: string): Promise<K8sResourceConfigMap> => {
-  await RESTApi.deleteSubscription();
+    await RESTApi.deleteSubscription();
 
     const response = await axiosFetch<K8sResourceConfigMap>(configMapPathItem(name), {
       method: 'DELETE'
@@ -251,10 +252,9 @@ export const RESTApi = {
       data
     });
 
-     await axiosFetch<K8sResourceSecret>(`${secretsPath()}/${response.metadata?.name}`, {
-       method: 'DELETE'
-     });
-
+    // await axiosFetch<K8sResourceSecret>(`${secretsPath()}/${response.metadata?.name}`, {
+    //   method: 'DELETE'
+    // });
 
     return response;
   },

@@ -6,7 +6,7 @@ import { RESTApi } from '@API/REST.api';
 
 const YAML = function () {
   const { data: configMapSite } = useQuery({
-    queryKey: ['find-site-query'],
+    queryKey: ['find-yaml-query'],
     queryFn: () => RESTApi.findConfigMap()
   });
 

@@ -14,6 +14,9 @@ const config: any = {
   devServer: {
     port: 3000,
     historyApiFallback: true,
+    static: {
+      directory: path.join(ROOT, 'src/local/public')
+    },
     compress: true
   },
 
@@ -65,7 +68,7 @@ const config: any = {
       patterns: [{ from: path.resolve(ROOT, 'locales'), to: 'locales' }]
     }),
     new HtmlWebpackPlugin({
-      template: path.join(ROOT, 'src/local/index.html'),
+      template: path.join(ROOT, 'src/local/public/index.html'),
       templateParameters: {
         title: ''
       }

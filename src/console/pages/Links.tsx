@@ -154,7 +154,7 @@ const Links: FC<{ siteId: string }> = function ({ siteId }) {
     <>
       <Card isPlain>
         <CardHeader>
-          <Title headingLevel="h1">{t('Links created from the site')}</Title>
+          <Title headingLevel="h1">{t('Links')}</Title>
         </CardHeader>
 
         <CardBody>

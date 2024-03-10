@@ -52,7 +52,6 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
   const claimsMadeRef = useRef<string>(DEFAULT_CLAIMS_MADE);
 
   const [step, setStep] = useState(1);
-  const [isTokenDownloaded, setIsTokenDownloaded] = useState(false);
 
   const { data: token, refetch: refetchFindToken } = useQuery({
     queryKey: ['find-token-query', nameRef.current],
@@ -73,11 +72,11 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
 
   const handleSubmit = useCallback(() => {
     //TODO: waiting for skupper v2
-    const data = {
-      claimExpiration: claimExpirationRef.current,
-      claimsMade: claimsMadeRef.current,
-      name: nameRef.current
-    };
+    // const data = {
+    //   claimExpiration: claimExpirationRef.current,
+    //   claimsMade: claimsMadeRef.current,
+    //   name: nameRef.current
+    // };
 
     if (!nameRef.current) {
       setValidated(t('Fill out all required fields before continuing'));
@@ -90,7 +89,6 @@ const TokenForm: FC<{ onSubmit?: SubmitFunction; onCancel?: CancelFunction }> = 
 
   const handleDownload = useCallback(() => {
     refetchFindToken();
-    setIsTokenDownloaded(true);
   }, [refetchFindToken]);
 
   const handleNextStep = useCallback(() => {

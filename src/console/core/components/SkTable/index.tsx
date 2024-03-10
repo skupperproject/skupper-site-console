@@ -140,7 +140,7 @@ const SkTable = function <T>({
     [alwaysShowPagination, pagination, paginationPageSize, paginationTotalRows]
   );
 
-  const { shouldSort = true, isFullHeight = false, isPlain, ...restProps } = props;
+  const { shouldSort = false, isFullHeight = false, isPlain, ...restProps } = props;
 
   return (
     <Card isFullHeight={isFullHeight} isPlain={isPlain || true}>
