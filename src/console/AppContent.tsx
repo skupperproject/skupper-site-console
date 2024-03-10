@@ -61,35 +61,36 @@ const AppContent = function () {
     <Connectors key={6} />
   ];
 
-  return (
-    <PageSection variant={PageSectionVariants.light} padding={{ default: 'noPadding' }}>
-      <PageNavigation>
-        <Tabs
-          mountOnEnter
-          unmountOnExit
-          activeKey={activeTabKey}
-          onSelect={(_: MouseEvent | KeyboardEvent | MouseEvent, tabIndex: string | number) => handleTabClick(tabIndex)}
-        >
-          <Tab eventKey={0} title={<TabTitleText>{t('GetStartedTab')}</TabTitleText>} />
-          <Tab eventKey={1} title={<TabTitleText>{t('DetailsTab')}</TabTitleText>} />
-          <Tab eventKey={2} title={<TabTitleText>{t('YamlTab')}</TabTitleText>} />
-          <Tab eventKey={3} title={<TabTitleText>{t('LinksTab')}</TabTitleText>} />
-          <Tab eventKey={4} title={<TabTitleText>{t('ListenersTab')}</TabTitleText>} />
-          <Tab eventKey={5} title={<TabTitleText>{t('ConnectorsTab')}</TabTitleText>} />
-        </Tabs>
-      </PageNavigation>
 
-      <Suspense
-        fallback={
-          <Bullseye>
-            <Spinner size="xl" />
-          </Bullseye>
-        }
+return (
+  <PageSection variant={PageSectionVariants.light} padding={{ default: 'noPadding' }}>
+    <PageNavigation>
+      <Tabs
+        mountOnEnter
+        unmountOnExit
+        activeKey={activeTabKey}
+        onSelect={(_: MouseEvent | KeyboardEvent | MouseEvent, tabIndex: string | number) => handleTabClick(tabIndex)}
       >
-        <PageSection>{components[activeTabKey as number]}</PageSection>
-      </Suspense>
-    </PageSection>
-  );
+        <Tab eventKey={0} title={<TabTitleText>{t('GetStartedTab')}</TabTitleText>} />
+        <Tab eventKey={1} title={<TabTitleText>{t('DetailsTab')}</TabTitleText>} />
+        <Tab eventKey={2} title={<TabTitleText>{t('YamlTab')}</TabTitleText>} />
+        <Tab eventKey={3} title={<TabTitleText>{t('LinksTab')}</TabTitleText>} />
+        <Tab eventKey={4} title={<TabTitleText>{t('ListenersTab')}</TabTitleText>} />
+        <Tab eventKey={5} title={<TabTitleText>{t('ConnectorsTab')}</TabTitleText>} />
+      </Tabs>
+    </PageNavigation>
+
+    <Suspense
+      fallback={
+        <Bullseye>
+          <Spinner size="xl" />
+        </Bullseye>
+      }
+    >
+      <PageSection>{components[activeTabKey as number]}</PageSection>
+    </Suspense>
+  </PageSection>
+);
 };
 
 export default AppContent;
