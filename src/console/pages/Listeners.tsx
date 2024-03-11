@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 
-import { Button, Modal, ModalVariant, Alert, Stack, StackItem } from '@patternfly/react-core';
+import { Button, Modal, ModalVariant, Alert, Stack, StackItem, AlertActionCloseButton } from '@patternfly/react-core';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,7 @@ const Listeners: FC<{ siteId: string }> = function ({ siteId }) {
   const { t } = useTranslation(I18nNamespace);
 
   const [isOpen, setIsOpen] = useState<boolean>();
+  const [showAlert, setShowAlert] = useState<boolean>(true);
 
   const { data: listeners, refetch: refetch } = useQuery({
     queryKey: ['get-listeners-query'],
@@ -65,13 +66,17 @@ const Listeners: FC<{ siteId: string }> = function ({ siteId }) {
     <>
       <Stack hasGutter>
         <StackItem>
-          <Alert
-            variant="info"
-            isInline
-            title={t(
-              'A listener is a local connection endpoint that is associated with remote servers. Listeners expose a host and port for accepting connections. Listeners use a routing key to forward connection data to remote connectors.'
-            )}
-          />
+          {showAlert && (
+            <Alert
+              hidden={true}
+              variant="info"
+              isInline
+              actionClose={<AlertActionCloseButton onClose={() => setShowAlert(false)} />}
+              title={t(
+                'A listener is a local connection endpoint that is associated with remote servers. Listeners expose a host and port for accepting connections. Listeners use a routing key to forward connection data to remote connectors.'
+              )}
+            />
+          )}
         </StackItem>
 
         <StackItem>

@@ -18,10 +18,10 @@ const InstructionBlock: FC<{
     <Panel variant="bordered">
       <Split hasGutter>
         <SplitItem>
-          <img src={img} alt="Link tutorial" />
+          <img src={img} alt="Link tutorial" style={{ width: '200px' }} />
         </SplitItem>
 
-        <SplitItem isFilled style={{ width: '70%' }}>
+        <SplitItem isFilled style={{ width: '100%' }}>
           <Flex
             direction={{ default: 'column' }}
             justifyContent={{ default: 'justifyContentCenter' }}
