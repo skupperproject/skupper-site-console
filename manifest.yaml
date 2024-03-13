@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: site-console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: site-console
+  namespace: site-console
+  labels:
+    app: site-console
+    app.kubernetes.io/component: site-console
+    app.kubernetes.io/instance: site-console
+    app.kubernetes.io/name: site-console
+    app.kubernetes.io/part-of: site-console
+    app.openshift.io/runtime-namespace: site-console
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: site-console
+  template:
+    metadata:
+      labels:
+        app: site-console
+        app.kubernetes.io/component: site-console
+        app.kubernetes.io/instance: site-console
+        app.kubernetes.io/name: site-console
+        app.kubernetes.io/part-of: site-console
+    spec:
+      containers:
+        - name: site-console
+          image: quay.io/vbartoli/rhsi-plugin:latest
+          ports:
+            - containerPort: 9443
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: plugin-serving-cert
+              readOnly: true
+              mountPath: /var/serving-cert
+            - name: nginx-conf
+              readOnly: true
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: plugin-serving-cert
+          secret:
+            secretName: plugin-serving-cert
+            defaultMode: 420
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+            defaultMode: 420
+        - name: plugin-conf
+          configMap:
+            name: plugin-conf
+            defaultMode: 420
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: site-console
+  labels:
+    app: site-console
+    app.kubernetes.io/component: site-console
+    app.kubernetes.io/instance: site-console
+    app.kubernetes.io/name: site-console
+    app.kubernetes.io/part-of: site-console
+data:
+  nginx.conf: |
+    error_log /dev/stdout;
+    events {}
+    http {
+      access_log         /dev/stdout;
+      include            /etc/nginx/mime.types;
+      default_type       application/octet-stream;
+      keepalive_timeout  65;
+
+      server {
+        listen              9443 ssl;
+        ssl_certificate     /var/serving-cert/tls.crt;
+        ssl_certificate_key /var/serving-cert/tls.key;
+
+        add_header oauth_token "$http_Authorization";
+
+        location / {
+          root                /usr/share/nginx/html;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plugin-conf
+  namespace: site-console
+  labels:
+    app: site-console
+    app.kubernetes.io/component: site-console
+    app.kubernetes.io/instance: site-console
+    app.kubernetes.io/name: site-console
+    app.kubernetes.io/part-of: site-console
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: plugin-serving-cert
+  name: site-console
+  namespace: site-console
+  labels:
+    app: site-console
+    app.kubernetes.io/component: site-console
+    app.kubernetes.io/instance: site-console
+    app.kubernetes.io/name: site-console
+    app.kubernetes.io/part-of: site-console
+spec:
+  ports:
+    - name: 9443-tcp
+      protocol: TCP
+      port: 9443
+      targetPort: 9443
+  selector:
+    app: site-console
+  type: ClusterIP
+  sessionAffinity: None
+---
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  name: site-console
+spec:
+  displayName: 'OpenShift Service Interconnect Console'
+  backend:
+    type: Service
+    service:
+      name: site-console
+      namespace: site-console
+      port: 9443
+      basePath: '/'

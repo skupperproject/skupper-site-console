@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@assets/*": ["console/assets/*"],
+      "@core/*": ["console/core/*"],
+      "@config/*": ["console/config/*"],
+      "@pages/*": ["console/pages/*"],
+      "@API/*": ["console/API/*"],
+      "@K8sResources/*": ["console/K8sResources/*"]
+    }
+  }
+}

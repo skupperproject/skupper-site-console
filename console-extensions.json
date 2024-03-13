@@ -1,0 +1,17 @@
+[
+  {
+    "type": "console.tab/horizontalNav",
+    "properties": {
+      "model": {
+        "group": "project.openshift.io",
+        "kind": "Project",
+        "version": "v1"
+      },
+      "page": {
+        "name": "Service Interconnect",
+        "href": "/site_console"
+      },
+      "component": { "$codeRef": "ProjectEntryTab" }
+    }
+  }
+]
